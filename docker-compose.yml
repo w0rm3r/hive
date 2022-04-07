@@ -31,26 +31,6 @@ services:
     networks:
       - Hive
   
-  cortex:
-    container_name: cortex
-    image: thehiveproject/cortex:latest
-    depends_on:
-      - elasticsearch
-    environment:
-      - 'JOB_DIRECTORY=/opt/cortex/jobs'
-    ports:
-      - '0.0.0.0:7001:9001'
-    volumes:
-      - ./cortex/application.conf:/etc/cortex/application.conf
-      - '/var/run/docker.sock:/var/run/docker.sock'
-      - ./cortex/log/:/var/log/cortex
-      - /tmp:/tmp
-      #- ./cortex/Cortex-Analyzers:/opt/cortex/analyzers
-      #- .cortex/Cortex-Analyzers/analyzers.json:/opt/cortex/analyzers/analyzers.json
-    privileged: true
-    networks:
-      - Hive
-  
   thehive:
     container_name: thehive
     image: 'thehiveproject/thehive4:latest'
@@ -63,9 +43,6 @@ services:
       - ./thehive/application.conf:/etc/thehive/application.conf
       - ./thehive/data:/opt/thp/thehive/data
       - ./thehive/index:/opt/thp/thehive/index
-    command:
-      --cortex-port 9001
-      --cortex-keys ${CORTEX_KEY}
     networks:
       - Hive
       
