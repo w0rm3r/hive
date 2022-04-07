@@ -22,7 +22,7 @@ services:
       - http.host=0.0.0.0
       - discovery.type=single-node
       - cluster.name=hive
-      - script.allowed_types= inline
+      - script.allowed_types=inline
       - thread_pool.search.queue_size=100000
       - thread_pool.write.queue_size=10000
       - gateway.recover_after_nodes=1
