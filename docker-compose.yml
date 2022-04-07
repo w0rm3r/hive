@@ -20,29 +20,28 @@ services:
         image: docker.elastic.co/elasticsearch/elasticsearch:8.1.2
         restart: unless-stopped
         ports:
-            - '0.0.0.0:7200:9200'
+            - '7200:9200'
         environment:
-            - http.host=0.0.0.0
-            - xpack.security.enabled=false
-            - cluster.name=hive
-            - bootstrap.memory_lock=true
-            - script.allowed_types=inline
-            - thread_pool.search.queue_size=100000
-            - thread_pool.write.queue_size=10000
-            - discovery.type=single-node
+        - http.host=0.0.0.0
+        - discovery.type=single-node
+        - cluster.name=hive
+        - script.allowed_types= inline
+        - thread_pool.search.queue_size=100000
+        - thread_pool.write.queue_size=10000
+        - gateway.recover_after_nodes=1
+        - xpack.security.enabled=false
+        - bootstrap.memory_lock=true
+        - ES_JAVA_OPTS=-Xms256m -Xmx256m
         ulimits:
-          nofile:
-              soft: 65536
-              hard: 65536
-          memlock:
-              soft: -1
-              hard: -1
+        nofile:
+            soft: 65536
+            hard: 65536
         volumes:
             - ./elasticsearch/data:/usr/share/elasticsearch/data
             - ./elasticsearch/logs:/usr/share/elasticsearch/logs
         networks:
             - Hive
-            
+
     cortex:
         image: thehiveproject/cortex:latest
         container_name: cortex
@@ -52,14 +51,13 @@ services:
         environment:
             - JOB_DIRECTORY=/opt/cortex/jobs
         ports:
-            - "0.0.0.0:9001:9001"
+            - "7001:9001"
         volumes:
             - ./cortex/application.conf:/etc/cortex/application.conf
-            - /opt/cortex/jobs:/opt/cortex/jobs
-            - /var/run/docker.sock:/var/run/docker.sock
+            - '/var/run/docker.sock:/var/run/docker.sock'
             - ./cortex/log/:/var/log/cortex
             - /tmp:/tmp
-        command: '--no-config --no-config-secret'
+        privileged: true
         networks:
             - Hive
 
@@ -72,13 +70,13 @@ services:
             - cortex
             - cassandra
         ports:
-            - "0.0.0.0:7000:9000"
+            - "7000:9000"
         volumes:
             - ./thehive/application.conf:/etc/thehive/application.conf
             - ./thehive/db:/opt/thp/thehive/db
             - ./thehive/index:/opt/thp/thehive/index
             - ./thehive/data:/opt/thp/thehive/data
-        command: '--no-config --no-config-secret'
+        command: '--cortex-port 9001 --cortex-keys ${CORTEX_KEY}'
         networks:
             - Hive
 
